@@ -24,23 +24,18 @@ public class AlunoController {
     @PostMapping(path = "/v1/alunos", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity saveAlunos(@RequestBody XablauDTO xablau) {
         List<Aluno> alunosEntity = new ArrayList<>();
+
         xablau.getAlunos().forEach(a -> {
             alunosEntity.add(new Aluno(a.getNome(), a.getDataNascimento(), a.getNomeMae(), getNotasList(a.getNotas())));
         });
 
-        repository.saveAll(alunosEntity);
-        List<Aluno> all = repository.findAll();
-        return ResponseEntity.ok(all);
+        return ResponseEntity.ok(repository.saveAll(alunosEntity));
     }
 
-    @GetMapping(path = "/v1/alunos", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public List<AlunoDTO> getAlunos(){
-        List<AlunoDTO> list = new ArrayList<>();
-        repository.findAll().forEach(a -> {
-            list.add(new AlunoDTO(a.getNome(), a.getDataNascimento(), a.getNomeMae(), getNotasListDTO(a.getNotas())));
-        });
 
-        return list;
+    @GetMapping(path = "/v1/alunos-por-nota/{nota}")
+    public ResponseEntity getAlunosByNota(@PathVariable("nota") BigDecimal nota){
+        return ResponseEntity.ok(repository.findByNotasNota(nota));
     }
 
     private List<Nota> getNotasList(List<NotaDTO> notas) {
@@ -63,9 +58,6 @@ public class AlunoController {
         return list;
     }
 
-    @GetMapping(path = "/v1/alunos-por-nota/{nota}")
-    public ResponseEntity getAlunosByNota(@PathVariable("nota") BigDecimal nota){
-        return ResponseEntity.ok(repository.findByNotasNota(nota));
-    }
+
 
 }
